@@ -20,7 +20,10 @@ export default defineConfig({
     open: false,
     strictPort: false,
     proxy: {
-      '/api': {
+      // 只代理真正的接口路径：/api 与 /api/...。
+      // 字符串前缀 '/api' 会把前端页面路由 /apiclient 也转发给后端，
+      // 后端不认识这个页面路径直接 404，API接入页因此打不开。
+      '^/api(/|$)': {
         target: proxyTarget,
         changeOrigin: true,
       },

@@ -1,4 +1,7 @@
-"""采集报告 分析看板接口：汇总指标、参数运行与结果导出。"""
+"""采集报告 分析看板接口：汇总指标、参数运行与结果导出。
+
+相邻业务面：失败接口批次与待核对内容跟随API调用重试数据台账的状态变化实时更新。
+"""
 from __future__ import annotations
 
 import csv
@@ -10,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 
 from app.schemas import ActionPayload, ActionResult, EntryPayload
+from app.services.apiclient_retry import retry_service
 from app.services.report import ReportService
 
 router = APIRouter(prefix="/api/report", tags=["采集报告"])
@@ -32,6 +36,12 @@ def get_summary() -> dict[str, Any]:
         {"label": "最新指标值", "value": round(random.uniform(0.72, 0.99), 3), "trend": random.randint(-8, 15)},
         {"label": "异常记录", "value": random.randint(0, 8), "trend": -random.randint(1, 10)},
     ]}
+
+
+@router.get("/retry_review")
+def get_retry_review() -> dict[str, Any]:
+    """相邻业务面视图：API调用重试台账的失败接口批次与待核对清单，随台账状态同步变化。"""
+    return retry_service.review_snapshot()
 
 
 @router.get("")
